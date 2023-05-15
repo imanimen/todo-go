@@ -14,8 +14,8 @@ type todo struct {
 
 var todos = []todo{
 	{ID: "1", Item: "Clean Room", Completed: false},
-	{ID: "2", Item: "Do Homework", Completed: true},
-	{ID: "3", Item: "Read Book", Completed: true},
+	{ID: "2", Item: "Do Homework", Completed: false},
+	{ID: "3", Item: "Read Book", Completed: false},
 }
 
 func getAllTodos(context *gin.Context) {
@@ -42,6 +42,16 @@ func getTodo(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, singleTodo)
 
 }
+func toggleTodoStatus(context *gin.Context) {
+	id := context.Param("id")
+	singleTodo, err := getTodoById(id)
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found"})
+		return
+	}
+	singleTodo.Completed = !singleTodo.Completed
+	context.IndentedJSON(http.StatusOK, singleTodo)
+}
 
 // handler
 func getTodoById(id string) (*todo, error) {
@@ -58,6 +68,7 @@ func main() {
 	router.GET("/api/rest/ToDo/todos", getAllTodos)
 	router.GET("/api/rest/ToDo/todos/:id", getTodo)
 	router.POST("/api/rest/ToDo/todo", addTodo)
+	router.PATCH("/api/rest/ToDo/todos/:id", toggleTodoStatus)
 	err := router.Run("localhost:7000")
 	if err != nil {
 		return
