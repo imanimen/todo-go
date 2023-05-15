@@ -18,12 +18,23 @@ var todos = []todo{
 }
 
 func getAllTodos(context *gin.Context) {
-	context.IndentedJSON(http.StatusOK, todos)
+	context.IndentedJSON(http.StatusOK, todos) // to return json IntendedJSON
+}
+
+func addTodo(context *gin.Context) {
+	var newTodo todo
+	if err := context.BindJSON(&newTodo); err != nil { // to get json BindJSON
+		return
+	}
+
+	todos = append(todos, newTodo)
+	context.IndentedJSON(http.StatusCreated, todos)
 }
 
 func main() {
 	router := gin.Default()
-	router.GET("/todos", getAllTodos)
+	router.GET("/api/rest/ToDo/todos", getAllTodos)
+	router.POST("/api/rest/ToDo/todo", addTodo)
 	err := router.Run("localhost:7000")
 	if err != nil {
 		return
