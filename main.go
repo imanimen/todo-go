@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -31,9 +32,31 @@ func addTodo(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, todos)
 }
 
+func getTodo(context *gin.Context) {
+	id := context.Param("id")
+	singleTodo, err := getTodoById(id)
+	if err != nil {
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Todo not found"})
+		return
+	}
+	context.IndentedJSON(http.StatusOK, singleTodo)
+
+}
+
+// handler
+func getTodoById(id string) (*todo, error) {
+	for i, t := range todos {
+		if t.ID == id {
+			return &todos[i], nil
+		}
+	}
+	return nil, errors.New("todo not found")
+}
+
 func main() {
 	router := gin.Default()
 	router.GET("/api/rest/ToDo/todos", getAllTodos)
+	router.GET("/api/rest/ToDo/todos/:id", getTodo)
 	router.POST("/api/rest/ToDo/todo", addTodo)
 	err := router.Run("localhost:7000")
 	if err != nil {
